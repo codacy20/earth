@@ -1,37 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Earth: Interactive Solar System Simulation
+
+This project is an interactive solar system simulation built with [Next.js](https://nextjs.org) and [D3.js](https://d3js.org). It renders a sun at the center of the screen with eight planets orbiting it along elliptical paths. The simulation includes interactive features—hovering over a planet pauses its orbit and displays its name, and Mercury/Venus dynamically adjust their z-order to simulate realistic depth.
+
+## Features
+
+- **Responsive Design:** The simulation scales to fit the width of your screen.
+- **Dynamic Animation:** Planets orbit continuously, and hovering over a planet stops its motion and displays a label.
+- **Realistic Depth:** Mercury and Venus change their z-order based on their y-position relative to the sun.
+- **Next.js & D3.js:** Leverages Next.js for a modern React framework experience and D3.js for powerful SVG rendering and animations.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v14 or above recommended)
+- [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/)
+
+### Installation
+
+1. **Clone the Repository:**
+
+   ```bash
+   git clone https://github.com/your-username/earth.git
+   cd earth
+   ```
+
+2. **Install Dependencies:**
+
+   Using npm:
+
+   ```bash
+   npm install
+   ```
+
+   Or using Yarn:
+
+   ```bash
+   yarn install
+   ```
+
+### Running the Application
+
+Start the development server:
+
+Using npm:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or using Yarn:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+yarn dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the solar system simulation in action.
+look and feel.
+
+## Deployment
+
+To build the application for production, run:
+
+Using npm:
+
+```bash
+npm run build
+```
+
+Or using Yarn:
+
+```bash
+yarn build
+```
+
+You can then deploy the production build to your favorite hosting service (e.g., Vercel, Netlify, etc.).
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- **Next.js Documentation:** Learn about Next.js features and deployment.
+- **D3.js Documentation:** Explore D3.js for advanced data visualization.
+- **Vercel Deployment:** Guide to deploying Next.js applications on Vercel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is licensed under the MIT License.
 
-## Deploy on Vercel
+## Contact
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For any questions or suggestions, please open an issue in the repository or contact via email.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# earth
+Happy orbiting!
