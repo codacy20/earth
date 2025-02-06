@@ -59,12 +59,42 @@ const SolarSystem = () => {
 
     // Create a dictionary to store each planet’s circle.
     const planetCircles = {};
+    // Dictionary to track if a planet is paused (hovered over).
+    const pausedPlanets = {};
+    // Dictionary to store label text elements.
+    const labelElements = {};
+
     planets.forEach((planet) => {
+      pausedPlanets[planet.name] = false;
       planetCircles[planet.name] = objectsGroup
         .append('circle')
         .attr('class', `planet ${planet.name}`)
         .attr('r', planet.r)
-        .attr('fill', planet.color);
+        .attr('fill', planet.color)
+        // Add mouse event listeners.
+        .on('mouseover', function (event) {
+          pausedPlanets[planet.name] = true;
+          // Create a label text element if not already created.
+          if (!labelElements[planet.name]) {
+            labelElements[planet.name] = objectsGroup
+              .append('text')
+              .attr('class', 'label')
+              .text(planet.name)
+              .attr('font-size', '12px')
+              .attr('fill', 'white')
+              .attr('text-anchor', 'middle')
+              // Position the label slightly above the planet.
+              .attr('dy', -10);
+          }
+        })
+        .on('mouseout', function (event) {
+          pausedPlanets[planet.name] = false;
+          // Remove the label text element.
+          if (labelElements[planet.name]) {
+            labelElements[planet.name].remove();
+            delete labelElements[planet.name];
+          }
+        });
     });
 
     // Initialize each planet’s starting angle.
@@ -76,16 +106,22 @@ const SolarSystem = () => {
     // Animate the planets.
     d3.timer(() => {
       planets.forEach((planet) => {
-        // Update the angle.
-        planetAngles[planet.name] = (planetAngles[planet.name] + planet.speed) % (2 * Math.PI);
+        // Only update the angle if the planet isn't paused.
+        if (!pausedPlanets[planet.name]) {
+          planetAngles[planet.name] = (planetAngles[planet.name] + planet.speed) % (2 * Math.PI);
+        }
         // Calculate the planet's position along its elliptical orbit.
         const x = centerX + planet.orbitRadiusX * Math.cos(planetAngles[planet.name]);
         const y = centerY + planet.orbitRadiusY * Math.sin(planetAngles[planet.name]);
         // Update the planet's position.
         planetCircles[planet.name].attr('cx', x).attr('cy', y);
 
+        // If the planet has a label, update its position so that it follows the planet.
+        if (labelElements[planet.name]) {
+          labelElements[planet.name].attr('x', x).attr('y', y);
+        }
+
         // For Mercury and Venus, adjust their z-order relative to the sun.
-        // When the planet's y is less than centerY, it's behind the sun.
         if (planet.name === 'Mercury' || planet.name === 'Venus') {
           if (y < centerY) {
             // Insert the element before the sun in the DOM so it appears behind.
