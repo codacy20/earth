@@ -4,11 +4,11 @@ import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
 const SolarSystem = () => {
-  // Set the dimensions of the SVG canvas.
-  const width = 800;
-  const height = 600;
-  const centerX = width / 2;
-  const centerY = height / 2;
+  // Define the coordinate system dimensions.
+  const viewWidth = 800;
+  const viewHeight = 600;
+  const centerX = viewWidth / 2;
+  const centerY = viewHeight / 2;
 
   // Reference to the SVG element.
   const svgRef = useRef(null);
@@ -23,14 +23,14 @@ const SolarSystem = () => {
 
     // Define an array of planets with their properties.
     const planets = [
-      { name: 'Mercury', color: 'gray', r: 4, orbitRadiusX: 60, orbitRadiusY: 20, speed: 0.04 },
-      { name: 'Venus', color: 'orange', r: 7, orbitRadiusX: 90, orbitRadiusY: 30, speed: 0.03 },
-      { name: 'Earth', color: 'blue', r: 8, orbitRadiusX: 120, orbitRadiusY: 40, speed: 0.02 },
-      { name: 'Mars', color: 'red', r: 6, orbitRadiusX: 150, orbitRadiusY: 50, speed: 0.015 },
-      { name: 'Jupiter', color: 'brown', r: 12, orbitRadiusX: 200, orbitRadiusY: 70, speed: 0.01 },
-      { name: 'Saturn', color: 'goldenrod', r: 10, orbitRadiusX: 250, orbitRadiusY: 90, speed: 0.008 },
-      { name: 'Uranus', color: 'lightblue', r: 9, orbitRadiusX: 300, orbitRadiusY: 100, speed: 0.007 },
-      { name: 'Neptune', color: 'blue', r: 9, orbitRadiusX: 350, orbitRadiusY: 110, speed: 0.006 },
+      { name: 'Mercury', color: 'gray', r: 4, orbitRadiusX: 60, orbitRadiusY: 20, speed: 0.004 },
+      { name: 'Venus', color: 'orange', r: 7, orbitRadiusX: 90, orbitRadiusY: 30, speed: 0.004 },
+      { name: 'Earth', color: 'blue', r: 8, orbitRadiusX: 120, orbitRadiusY: 40, speed: 0.004 },
+      { name: 'Mars', color: 'red', r: 6, orbitRadiusX: 150, orbitRadiusY: 50, speed: 0.004 },
+      { name: 'Jupiter', color: 'brown', r: 12, orbitRadiusX: 200, orbitRadiusY: 70, speed: 0.004 },
+      { name: 'Saturn', color: 'goldenrod', r: 10, orbitRadiusX: 250, orbitRadiusY: 90, speed: 0.004 },
+      { name: 'Uranus', color: 'lightblue', r: 9, orbitRadiusX: 300, orbitRadiusY: 100, speed: 0.004 },
+      { name: 'Neptune', color: 'blue', r: 9, orbitRadiusX: 350, orbitRadiusY: 110, speed: 0.004 },
     ];
 
     // Draw orbits in the orbitGroup so they are always at the back.
@@ -57,11 +57,9 @@ const SolarSystem = () => {
       .attr('fill', 'yellow')
       .attr('opacity', 0.8);
 
-    // Create a dictionary to store each planet’s circle.
+    // Create dictionaries to store each planet’s circle, paused state, and label elements.
     const planetCircles = {};
-    // Dictionary to track if a planet is paused (hovered over).
     const pausedPlanets = {};
-    // Dictionary to store label text elements.
     const labelElements = {};
 
     planets.forEach((planet) => {
@@ -72,7 +70,7 @@ const SolarSystem = () => {
         .attr('r', planet.r)
         .attr('fill', planet.color)
         // Add mouse event listeners.
-        .on('mouseover', function (event) {
+        .on('mouseover', function () {
           pausedPlanets[planet.name] = true;
           // Create a label text element if not already created.
           if (!labelElements[planet.name]) {
@@ -87,7 +85,7 @@ const SolarSystem = () => {
               .attr('dy', -10);
           }
         })
-        .on('mouseout', function (event) {
+        .on('mouseout', function () {
           pausedPlanets[planet.name] = false;
           // Remove the label text element.
           if (labelElements[planet.name]) {
@@ -139,7 +137,10 @@ const SolarSystem = () => {
     });
   }, [centerX, centerY]);
 
-  return <svg ref={svgRef} width={width} height={height} />;
+  return (
+    // The SVG uses a viewBox of 800x600 and scales to 100% of the container's width.
+    <svg ref={svgRef} viewBox={`0 0 ${viewWidth} ${viewHeight}`} style={{ width: '100%', height: 'auto' }} />
+  );
 };
 
 export default SolarSystem;
