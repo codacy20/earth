@@ -17,11 +17,11 @@ const SolarSystem = () => {
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    // Create groups so we can control layering.
+    // Create layering groups.
     const orbitGroup = svg.append('g').attr('class', 'orbits');
     const objectsGroup = svg.append('g').attr('class', 'objects');
 
-    // Define an array of planets with their properties.
+    // Define planets along with their properties.
     const planets = [
       { name: 'Mercury', color: 'gray', r: 4, orbitRadiusX: 60, orbitRadiusY: 20, speed: 0.004 },
       { name: 'Venus', color: 'orange', r: 7, orbitRadiusX: 90, orbitRadiusY: 30, speed: 0.004 },
@@ -33,21 +33,22 @@ const SolarSystem = () => {
       { name: 'Neptune', color: 'blue', r: 9, orbitRadiusX: 350, orbitRadiusY: 110, speed: 0.004 },
     ];
 
-    // Draw orbits in the orbitGroup so they are always at the back.
-    planets.forEach((planet) => {
-      orbitGroup
-        .append('ellipse')
-        .attr('class', `orbit ${planet.name}`)
-        .attr('cx', centerX)
-        .attr('cy', centerY)
-        .attr('rx', planet.orbitRadiusX)
-        .attr('ry', planet.orbitRadiusY)
-        .attr('fill', 'none')
-        .attr('stroke', 'gray')
-        .attr('stroke-dasharray', '4 2');
-    });
+    // Use data-join to draw orbit ellipses.
+    orbitGroup
+      .selectAll('ellipse')
+      .data(planets)
+      .enter()
+      .append('ellipse')
+      .attr('class', (d) => `orbit ${d.name}`)
+      .attr('cx', centerX)
+      .attr('cy', centerY)
+      .attr('rx', (d) => d.orbitRadiusX)
+      .attr('ry', (d) => d.orbitRadiusY)
+      .attr('fill', 'none')
+      .attr('stroke', 'gray')
+      .attr('stroke-dasharray', '4 2');
 
-    // Draw the sun in the objectsGroup.
+    // Draw the sun.
     const sun = objectsGroup
       .append('circle')
       .attr('class', 'sun')
@@ -57,78 +58,61 @@ const SolarSystem = () => {
       .attr('fill', 'yellow')
       .attr('opacity', 0.8);
 
-    // Create dictionaries to store each planet’s circle, paused state, and label elements.
-    const planetCircles = {};
-    const pausedPlanets = {};
-    const labelElements = {};
-
+    // Initialize each planet's dynamic properties.
     planets.forEach((planet) => {
-      pausedPlanets[planet.name] = false;
-      planetCircles[planet.name] = objectsGroup
+      planet.angle = Math.random() * 2 * Math.PI;
+      planet.paused = false;
+      // Draw the planet's circle.
+      planet.circle = objectsGroup
         .append('circle')
         .attr('class', `planet ${planet.name}`)
         .attr('r', planet.r)
         .attr('fill', planet.color)
-        // Add mouse event listeners.
+        // On hover, pause movement and display label.
         .on('mouseover', function () {
-          pausedPlanets[planet.name] = true;
-          // Create a label text element if not already created.
-          if (!labelElements[planet.name]) {
-            labelElements[planet.name] = objectsGroup
+          planet.paused = true;
+          if (!planet.label) {
+            planet.label = objectsGroup
               .append('text')
               .attr('class', 'label')
               .text(planet.name)
               .attr('font-size', '12px')
               .attr('fill', 'white')
               .attr('text-anchor', 'middle')
-              // Position the label slightly above the planet.
               .attr('dy', -10);
           }
         })
         .on('mouseout', function () {
-          pausedPlanets[planet.name] = false;
-          // Remove the label text element.
-          if (labelElements[planet.name]) {
-            labelElements[planet.name].remove();
-            delete labelElements[planet.name];
+          planet.paused = false;
+          if (planet.label) {
+            planet.label.remove();
+            planet.label = null;
           }
         });
     });
 
-    // Initialize each planet’s starting angle.
-    const planetAngles = {};
-    planets.forEach((planet) => {
-      planetAngles[planet.name] = Math.random() * 2 * Math.PI;
-    });
-
-    // Animate the planets.
+    // Animation loop.
     d3.timer(() => {
       planets.forEach((planet) => {
-        // Only update the angle if the planet isn't paused.
-        if (!pausedPlanets[planet.name]) {
-          planetAngles[planet.name] = (planetAngles[planet.name] + planet.speed) % (2 * Math.PI);
+        if (!planet.paused) {
+          planet.angle = (planet.angle + planet.speed) % (2 * Math.PI);
         }
-        // Calculate the planet's position along its elliptical orbit.
-        const x = centerX + planet.orbitRadiusX * Math.cos(planetAngles[planet.name]);
-        const y = centerY + planet.orbitRadiusY * Math.sin(planetAngles[planet.name]);
-        // Update the planet's position.
-        planetCircles[planet.name].attr('cx', x).attr('cy', y);
-
-        // If the planet has a label, update its position so that it follows the planet.
-        if (labelElements[planet.name]) {
-          labelElements[planet.name].attr('x', x).attr('y', y);
+        const x = centerX + planet.orbitRadiusX * Math.cos(planet.angle);
+        const y = centerY + planet.orbitRadiusY * Math.sin(planet.angle);
+        planet.circle.attr('cx', x).attr('cy', y);
+        if (planet.label) {
+          planet.label.attr('x', x).attr('y', y);
         }
-
-        // For Mercury and Venus, adjust their z-order relative to the sun.
+        // For Mercury and Venus, adjust z-order based on y-position.
         if (planet.name === 'Mercury' || planet.name === 'Venus') {
           if (y < centerY) {
-            // Insert the element before the sun in the DOM so it appears behind.
-            planetCircles[planet.name].each(function () {
+            // Appear behind the sun.
+            planet.circle.each(function () {
               this.parentNode.insertBefore(this, sun.node());
             });
           } else {
-            // Append the element after the sun so it appears in front.
-            planetCircles[planet.name].each(function () {
+            // Appear in front of the sun.
+            planet.circle.each(function () {
               this.parentNode.insertBefore(this, null);
             });
           }
@@ -137,10 +121,7 @@ const SolarSystem = () => {
     });
   }, [centerX, centerY]);
 
-  return (
-    // The SVG uses a viewBox of 800x600 and scales to 100% of the container's width.
-    <svg ref={svgRef} viewBox={`0 0 ${viewWidth} ${viewHeight}`} style={{ width: '100%', height: 'auto' }} />
-  );
+  return <svg ref={svgRef} viewBox={`0 0 ${viewWidth} ${viewHeight}`} style={{ width: '100%', height: 'auto' }} />;
 };
 
 export default SolarSystem;
